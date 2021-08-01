@@ -2,6 +2,7 @@
   <v-app>
     <v-main>
       <v-container>
+        <app-menu/>
         <nuxt />
       </v-container>
     </v-main>

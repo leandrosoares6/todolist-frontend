@@ -1,34 +1,40 @@
-<template>
-  <v-card class="mx-auto" max-width="700">
-    <v-list two-line>
-      <v-list-item-group>
-        <template v-for="(item, index) in todos">
-          <v-list-item :key="item.title">
-            <nuxt-link :to="item.id">
-              <template>
-                <v-list-item-content>
-                  <v-list-item-title v-text="item.title"></v-list-item-title>
-
-                  <v-list-item-subtitle
-                    class="text--primary"
-                    v-text="item.description"
-                  ></v-list-item-subtitle>
-
-                  <v-list-item-subtitle>
-                    Atualizado em
-                    {{ item.updatedAt | dateFormat("DD/MM/YY") }} às
-                    {{ item.updatedAt | dateFormat("HH:mm") }}
-                  </v-list-item-subtitle>
-                </v-list-item-content>
-              </template>
-            </nuxt-link>
-          </v-list-item>
-
-          <v-divider v-if="index < todos.length - 1" :key="index"></v-divider>
-        </template>
-      </v-list-item-group>
-    </v-list>
-  </v-card>
+  <template>
+  <client-only>
+    <v-data-table
+      :headers="headers"
+      :items="todos"
+      :items-per-page="10"
+      :search="search"
+      class="elevation-1"
+      :footer-props="{
+        showFirstLastPage: true,
+        itemsPerPageText: 'Registros por página',
+      }"
+    >
+      <template v-slot:top>
+        <v-text-field
+          v-model="search"
+          label="Pesquisar"
+          class="mx-4"
+        ></v-text-field>
+        <v-row justify="center">
+          <v-btn tile color="warning" class="mx-2 my-4">
+            <v-icon left> mdi-eraser </v-icon>
+            Limpar
+          </v-btn>
+          <v-btn tile color="info" class="mx-2 my-4">
+            <v-icon left> mdi-magnify </v-icon>
+            Consultar
+          </v-btn>
+          <v-btn tile color="success" class="mx-2 my-4">
+            <v-icon left> mdi-plus </v-icon>
+            Nova Tarefa
+          </v-btn>
+        </v-row>
+      </template>
+      ></v-data-table
+    >
+  </client-only>
 </template>
 
 <script>
@@ -36,10 +42,20 @@ export default {
   props: {
     todos: Array,
   },
-  computed: {
-    updatedAtLongDate() {
-      return;
-    },
+  data() {
+    return {
+      search: "",
+      headers: [
+        {
+          text: "Titulo",
+          align: "start",
+          sortable: false,
+          value: "title",
+        },
+        { text: "Descrição", value: "description" },
+        { text: "Data Criação", value: "createdAt" },
+      ],
+    };
   },
 };
 </script>

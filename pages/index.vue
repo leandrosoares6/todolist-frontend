@@ -1,6 +1,6 @@
 <template>
   <main class="container index">
-    <todo-insert @inserted="inserted" />
+    <!-- <todo-insert @inserted="inserted" /> -->
     <todo-list :todos="orderedTodos" />
   </main>
 </template>
