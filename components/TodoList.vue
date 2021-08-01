@@ -1,6 +1,11 @@
   <template>
   <client-only>
     <v-data-table
+      :page="page"
+      :pageCount="numberOfPages"
+      :options.sync="options"
+      :server-items-length="totalTodos"
+      :loading="loading"
       :headers="headers"
       :items="todos"
       :items-per-page="10"
@@ -13,20 +18,23 @@
     >
       <template v-slot:top>
         <v-text-field
+          clearable
+          outlined
+          ref="searchref"
           v-model="search"
           label="Pesquisar"
           class="mx-4"
         ></v-text-field>
-        <v-row justify="center">
-          <v-btn tile color="warning" class="mx-2 my-4">
+        <v-row justify="end">
+          <v-btn @click="reset" color="warning" class="mx-2 my-4">
             <v-icon left> mdi-eraser </v-icon>
             Limpar
           </v-btn>
-          <v-btn tile color="info" class="mx-2 my-4">
+          <v-btn color="info" class="mx-2 my-4">
             <v-icon left> mdi-magnify </v-icon>
             Consultar
           </v-btn>
-          <v-btn tile color="success" class="mx-2 my-4">
+          <v-btn color="success" class="ms-2 me-7 my-4">
             <v-icon left> mdi-plus </v-icon>
             Nova Tarefa
           </v-btn>
@@ -39,12 +47,10 @@
 
 <script>
 export default {
-  props: {
-    todos: Array,
-  },
   data() {
     return {
       search: "",
+      searchref: null,
       headers: [
         {
           text: "Titulo",
@@ -53,9 +59,51 @@ export default {
           value: "title",
         },
         { text: "Descrição", value: "description" },
-        { text: "Data Criação", value: "createdAt" },
+        { text: "Data Criação", value: "createdAtFormatted" },
       ],
+      loading: true,
+      page: 1,
+      numberOfPages: 0,
+      todos: [],
+      totalTodos: 0,
+      options: {},
     };
+  },
+  watch: {
+    options: {
+      handler() {
+        this.readDataFromAPI();
+      },
+    },
+    deep: true,
+  },
+  methods: {
+    reset() {
+      this.$refs.searchref.reset();
+    },
+    async readDataFromAPI() {
+      this.loading = true;
+      const { page, itemsPerPage } = this.options;
+      let pageNumber = page - 1;
+      await this.$axios
+        .$get("todos?size=" + itemsPerPage + "&page=" + pageNumber)
+        .then((response) => {
+          this.loading = false;
+          this.todos = response.content.map((todo) => {
+            return {
+              ...todo,
+              createdAtFormatted: this.$options.filters.dateFormat(
+                todo.createdAt, "DD/MM/YYYY"
+              ),
+            };
+          });
+          this.totalTodos = response.totalElements;
+          this.numberOfPages = response.totalPages;
+        });
+    },
+    mounted() {
+      this.readDataFromAPI();
+    },
   },
 };
 </script>

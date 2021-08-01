@@ -1,5 +1,3 @@
-import colors from 'vuetify/es5/util/colors'
-
 export default {
   head: {
     titleTemplate: '%s - todolist-frontend-updated',
