@@ -39,6 +39,46 @@
             Nova Tarefa
           </v-btn>
         </v-row>
+        <v-dialog v-model="dialog" max-width="500px">
+          <v-card>
+            <v-card-title>
+              <span class="text-h5">Atualizar tarefa</span>
+            </v-card-title>
+
+            <v-card-text>
+              <v-container>
+                <v-row>
+                  <v-col cols="12" sm="6" md="4">
+                    <v-text-field
+                      v-model="editedItem.title"
+                      label="Título"
+                    ></v-text-field>
+                  </v-col>
+                  <v-col cols="12" sm="6" md="4">
+                    <v-text-field
+                      v-model="editedItem.description"
+                      label="Descrição"
+                    ></v-text-field>
+                  </v-col>
+                  <v-col cols="12" sm="6" md="4">
+                    <v-text-field
+                      v-model="editedItem.status"
+                      label="Status"
+                    ></v-text-field>
+                  </v-col>
+                </v-row>
+              </v-container>
+            </v-card-text>
+
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn color="blue darken-1" text @click="close">
+                Cancelar
+              </v-btn>
+              <v-btn color="blue darken-1" text @click="save"> Salvar </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
         <v-dialog v-model="dialogDelete" max-width="500px">
           <v-card>
             <v-card-title class="text-h5"
@@ -172,11 +212,20 @@ export default {
     },
     save() {
       if (this.editedIndex > -1) {
-        Object.assign(this.todos[this.editedIndex], this.editedItem);
+        this.$axios
+          .$put("todos/" + this.todos[this.editedIndex].id, this.editedItem)
+          .then(() => {
+            Object.assign(this.todos[this.editedIndex], this.editedItem);
+            this.close();
+            this.readDataFromAPI();
+          });
       } else {
-        this.todos.push(this.editedItem);
+        this.$axios.$post("todos", this.editedItem).then(() => {
+          this.todos.push(this.editedItem);
+          this.close();
+          this.readDataFromAPI();
+        });
       }
-      this.close();
     },
     mounted() {
       this.readDataFromAPI();
