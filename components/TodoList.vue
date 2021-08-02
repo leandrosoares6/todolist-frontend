@@ -30,7 +30,7 @@
             <v-icon left> mdi-eraser </v-icon>
             Limpar
           </v-btn>
-          <v-btn color="info" class="ms-2 me-7 my-4">
+          <v-btn @click="mounted" color="info" class="ms-2 me-7 my-4">
             <v-icon left> mdi-magnify </v-icon>
             Consultar
           </v-btn>
@@ -55,24 +55,29 @@
             <v-card-text>
               <v-container>
                 <v-row>
-                  <v-col cols="12" sm="6" md="4">
-                    <v-text-field
-                      v-model="editedItem.title"
-                      label="Título"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="12" sm="6" md="4">
-                    <v-text-field
-                      v-model="editedItem.description"
-                      label="Descrição"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="12" sm="6" md="4">
-                    <v-text-field
-                      v-model="editedItem.status"
-                      label="Status"
-                    ></v-text-field>
-                  </v-col>
+                  <v-text-field
+                    outlined
+                    v-model="editedItem.title"
+                    label="Título"
+                  ></v-text-field>
+                </v-row>
+                <v-row>
+                  <v-textarea
+                    outlined
+                    name="input-7-4"
+                    v-model="editedItem.description"
+                    label="Status"
+                  >
+                  </v-textarea>
+                </v-row>
+                <v-row>
+                  <v-select
+                    :items="status"
+                    v-model="editedItem.status"
+                    label="Status"
+                    dense
+                    outlined
+                  ></v-select>
                 </v-row>
               </v-container>
             </v-card-text>
@@ -136,6 +141,7 @@ export default {
       page: 1,
       numberOfPages: 0,
       todos: [],
+      status: ["OPENED", "IN_PROGRESS", "COMPLETED"],
       totalTodos: 0,
       options: {},
       editedItem: {
@@ -167,22 +173,51 @@ export default {
       this.loading = true;
       const { page, itemsPerPage } = this.options;
       let pageNumber = page - 1;
-      await this.$axios
-        .$get("todos?size=" + itemsPerPage + "&page=" + pageNumber)
-        .then((response) => {
-          this.loading = false;
-          this.todos = response.content.map((todo) => {
-            return {
-              ...todo,
-              createdAtFormatted: this.$options.filters.dateFormat(
-                todo.createdAt,
-                "DD/MM/YYYY"
-              ),
-            };
+
+      if (this.search != "") {
+        await this.$axios
+          .$get(
+            "todos?size=" +
+              itemsPerPage +
+              "&page=" +
+              pageNumber +
+              "&title=" +
+              this.search +
+              "&description=" +
+              this.search
+          )
+          .then((response) => {
+            this.loading = false;
+            this.todos = response.content.map((todo) => {
+              return {
+                ...todo,
+                createdAtFormatted: this.$options.filters.dateFormat(
+                  todo.createdAt,
+                  "DD/MM/YYYY"
+                ),
+              };
+            });
+            this.totalTodos = response.totalElements;
+            this.numberOfPages = response.totalPages;
           });
-          this.totalTodos = response.totalElements;
-          this.numberOfPages = response.totalPages;
-        });
+      } else {
+        await this.$axios
+          .$get("todos?size=" + itemsPerPage + "&page=" + pageNumber)
+          .then((response) => {
+            this.loading = false;
+            this.todos = response.content.map((todo) => {
+              return {
+                ...todo,
+                createdAtFormatted: this.$options.filters.dateFormat(
+                  todo.createdAt,
+                  "DD/MM/YYYY"
+                ),
+              };
+            });
+            this.totalTodos = response.totalElements;
+            this.numberOfPages = response.totalPages;
+          });
+      }
     },
     editItem(item) {
       this.editedIndex = this.todos.indexOf(item);
@@ -239,6 +274,8 @@ export default {
     },
     reset() {
       this.$refs.searchref.reset();
+      this.search = "";
+      this.readDataFromAPI();
     },
   },
 };
