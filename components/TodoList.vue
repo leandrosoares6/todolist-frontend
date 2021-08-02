@@ -30,19 +30,26 @@
             <v-icon left> mdi-eraser </v-icon>
             Limpar
           </v-btn>
-          <v-btn color="info" class="mx-2 my-4">
+          <v-btn color="info" class="ms-2 me-7 my-4">
             <v-icon left> mdi-magnify </v-icon>
             Consultar
           </v-btn>
-          <v-btn color="success" class="ms-2 me-7 my-4">
-            <v-icon left> mdi-plus </v-icon>
-            Nova Tarefa
-          </v-btn>
         </v-row>
         <v-dialog v-model="dialog" max-width="500px">
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn
+              color="success"
+              class="ms-2 me-7 my-4"
+              v-bind="attrs"
+              v-on="on"
+            >
+              <v-icon left> mdi-plus </v-icon>
+              Nova Tarefa
+            </v-btn>
+          </template>
           <v-card>
             <v-card-title>
-              <span class="text-h5">Atualizar tarefa</span>
+              <span class="text-h5">Criar/editar tarefa</span>
             </v-card-title>
 
             <v-card-text>
