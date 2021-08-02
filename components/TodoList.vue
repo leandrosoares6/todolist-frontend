@@ -141,7 +141,8 @@ export default {
       page: 1,
       numberOfPages: 0,
       todos: [],
-      status: ["OPENED", "IN_PROGRESS", "COMPLETED"],
+      status: ["ABERTA", "EM_ANDAMENTO", "CONCLUIDA"],
+      statusMap: {OPENED: "ABERTA", IN_PROGRESS: "EM_ANDAMENTO", COMPLETED: "CONCLUIDA"},
       totalTodos: 0,
       options: {},
       editedItem: {
@@ -191,6 +192,7 @@ export default {
             this.todos = response.content.map((todo) => {
               return {
                 ...todo,
+                status: this.statusMap[todo.status],
                 createdAtFormatted: this.$options.filters.dateFormat(
                   todo.createdAt,
                   "DD/MM/YYYY"
@@ -208,6 +210,7 @@ export default {
             this.todos = response.content.map((todo) => {
               return {
                 ...todo,
+                status: this.statusMap[todo.status],
                 createdAtFormatted: this.$options.filters.dateFormat(
                   todo.createdAt,
                   "DD/MM/YYYY"
@@ -253,6 +256,8 @@ export default {
       });
     },
     save() {
+      let value = this.editedItem.status;
+      this.editedItem.status = Object.keys(this.statusMap).find(key => this.statusMap[key] === value);
       if (this.editedIndex > -1) {
         this.$axios
           .$put("todos/" + this.todos[this.editedIndex].id, this.editedItem)
